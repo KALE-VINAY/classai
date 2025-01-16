@@ -159,8 +159,6 @@
 
 
 
-
-
 import React, { useState, useEffect, useRef } from 'react';
 import useClipboard from 'react-use-clipboard';
 
@@ -312,30 +310,27 @@ const App = () => {
     setTranscript('');
   };
 
-  // Component return remains the same...
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
-      <h1 className="text-3xl font-bold text-blue-600 mb-6">ClassNotesAI</h1>
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-4 sm:p-6">
+      <h1 className="text-2xl sm:text-3xl font-bold text-blue-600 mb-4 sm:mb-6">ClassNotesAI</h1>
 
-      {/* Microphone Level Indicator */}
-      <div className="w-full max-w-3xl mb-4">
+      <div className="w-full max-w-2xl sm:max-w-3xl mb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className={`w-3 h-3 rounded-full ${isListening ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
-            <span className="text-gray-700">
+            <span className="text-gray-700 text-sm sm:text-base">
               {isListening ? 'Listening...' : 'Not listening'}
             </span>
           </div>
           {error && (
-            <div className="text-red-500 text-sm">
+            <div className="text-red-500 text-xs sm:text-sm">
               {error}
             </div>
           )}
         </div>
       </div>
 
-      {/* Auto-Restart Toggle */}
-      <div className="w-full max-w-3xl mb-4">
+      <div className="w-full max-w-2xl sm:max-w-3xl mb-4">
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -347,18 +342,16 @@ const App = () => {
         </label>
       </div>
 
-      {/* Transcript Display */}
       <div 
-        className="w-full max-w-3xl bg-white p-4 rounded shadow-md mb-4 min-h-[200px] text-gray-800 border border-gray-300"
+        className="w-full max-w-2xl sm:max-w-3xl bg-white p-4 rounded shadow-md mb-4 min-h-[150px] sm:min-h-[200px] text-gray-800 border border-gray-300 text-sm sm:text-base overflow-auto cursor-pointer"
         onClick={() => setTextToCopy(transcript)}
       >
         {transcript || "Your speech will appear here..."}
       </div>
 
-      {/* Control Buttons */}
-      <div className="flex gap-4">
+      <div className="flex flex-wrap gap-4 justify-center">
         <button
-          className={`px-4 py-2 ${isListening ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'} text-white rounded shadow transition`}
+          className={`px-4 py-2 text-sm sm:text-base ${isListening ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'} text-white rounded shadow transition`}
           onClick={startListening}
           disabled={isListening}
         >
@@ -366,7 +359,7 @@ const App = () => {
         </button>
 
         <button
-          className={`px-4 py-2 ${!isListening ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-500 hover:bg-red-600'} text-white rounded shadow transition`}
+          className={`px-4 py-2 text-sm sm:text-base ${!isListening ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-500 hover:bg-red-600'} text-white rounded shadow transition`}
           onClick={stopListening}
           disabled={!isListening}
         >
@@ -374,22 +367,21 @@ const App = () => {
         </button>
 
         <button
-          className="px-4 py-2 bg-blue-500 text-white rounded shadow hover:bg-blue-600 transition"
+          className="px-4 py-2 text-sm sm:text-base bg-blue-500 text-white rounded shadow hover:bg-blue-600 transition"
           onClick={setCopied}
         >
           {isCopied ? "Copied!" : "Copy to Clipboard"}
         </button>
 
         <button
-          className="px-4 py-2 bg-gray-500 text-white rounded shadow hover:bg-gray-600 transition"
+          className="px-4 py-2 text-sm sm:text-base bg-gray-500 text-white rounded shadow hover:bg-gray-600 transition"
           onClick={resetTranscript}
         >
           Reset
         </button>
       </div>
 
-      {/* Debug Info */}
-      <div className="mt-8 w-full max-w-3xl p-4 bg-gray-200 rounded text-sm">
+      <div className="mt-8 w-full max-w-2xl sm:max-w-3xl p-4 bg-gray-200 rounded text-xs sm:text-sm">
         <h2 className="font-bold mb-2">Troubleshooting Tips:</h2>
         <ul className="list-disc pl-4">
           <li>Speak clearly and at a normal volume</li>
