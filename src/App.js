@@ -159,34 +159,291 @@
 
 
 
-import React, { useState, useEffect, useRef } from 'react';
-import useClipboard from 'react-use-clipboard';
+// import React, { useState, useEffect, useRef } from 'react';
+// import useClipboard from 'react-use-clipboard';
+
+// const App = () => {
+//   const [transcript, setTranscript] = useState('');
+//   const [isListening, setIsListening] = useState(false);
+//   const [error, setError] = useState(null);
+//   const [autoRestart, setAutoRestart] = useState(true);
+//   const recognitionRef = useRef(null);
+//   const mediaStreamRef = useRef(null);
+//   const manuallyStoppedRef = useRef(false);
+//   const [textToCopy, setTextToCopy] = useState('');
+//   const [isCopied, setCopied] = useClipboard(textToCopy, { successDuration: 1000 });
+
+//   const cleanupMediaStream = () => {
+//     if (mediaStreamRef.current) {
+//       const tracks = mediaStreamRef.current.getTracks();
+//       tracks.forEach(track => {
+//         track.stop();
+//         console.log('Stopped media track:', track.kind);
+//       });
+//       mediaStreamRef.current = null;
+//     }
+//   };
+
+//   useEffect(() => {
+//     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+//       setError('Speech recognition is not supported in this browser. Please use Chrome.');
+//       return;
+//     }
+
+//     const initializeRecognition = () => {
+//       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+//       recognitionRef.current = new SpeechRecognition();
+
+//       recognitionRef.current.continuous = true;
+//       recognitionRef.current.interimResults = true;
+//       recognitionRef.current.lang = 'en-US';
+//       recognitionRef.current.maxAlternatives = 1;
+
+//       recognitionRef.current.onstart = () => {
+//         console.log('Speech recognition started');
+//         setIsListening(true);
+//         setError(null);
+//       };
+
+//       recognitionRef.current.onend = () => {
+//         console.log('Speech recognition ended');
+//         setIsListening(false);
+        
+//         if (manuallyStoppedRef.current) {
+//           cleanupMediaStream();
+//         } else if (autoRestart && !manuallyStoppedRef.current) {
+//           console.log('Auto-restarting speech recognition...');
+//           setTimeout(() => {
+//             try {
+//               recognitionRef.current?.start();
+//             } catch (e) {
+//               console.error('Error auto-restarting:', e);
+//             }
+//           }, 100);
+//         }
+//       };
+
+//       recognitionRef.current.onerror = (event) => {
+//         console.log('Speech recognition error:', event.error);
+        
+//         switch (event.error) {
+//           case 'no-speech':
+//             if (autoRestart && !manuallyStoppedRef.current) {
+//               try {
+//                 recognitionRef.current?.start();
+//               } catch (e) {
+//                 console.error('Error restarting after no-speech:', e);
+//               }
+//             }
+//             break;
+//           case 'audio-capture':
+//             setError('No microphone was found or microphone is disabled.');
+//             cleanupMediaStream();
+//             break;
+//           case 'not-allowed':
+//             setError('Microphone permission was denied. Please allow microphone access.');
+//             cleanupMediaStream();
+//             break;
+//           default:
+//             setError(`Error: ${event.error}`);
+//             cleanupMediaStream();
+//         }
+//       };
+
+//       recognitionRef.current.onresult = (event) => {
+//         let finalTranscript = '';
+//         let interimTranscript = '';
+
+//         for (let i = event.resultIndex; i < event.results.length; i++) {
+//           const transcript = event.results[i][0].transcript;
+//           if (event.results[i].isFinal) {
+//             finalTranscript += transcript + ' ';
+//           } else {
+//             interimTranscript += transcript;
+//           }
+//         }
+        
+//         if (finalTranscript) {
+//           setTranscript(prev => prev + finalTranscript);
+//           console.log('Transcribed:', finalTranscript);
+//         }
+//       };
+//     };
+
+//     initializeRecognition();
+
+//     return () => {
+//       if (recognitionRef.current) {
+//         manuallyStoppedRef.current = true;
+//         recognitionRef.current.stop();
+//         cleanupMediaStream();
+//       }
+//     };
+//   }, [autoRestart]);
+
+//   const startListening = async () => {
+//     try {
+//       manuallyStoppedRef.current = false;
+//       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+//       mediaStreamRef.current = stream;
+      
+//       if (recognitionRef.current) {
+//         recognitionRef.current.start();
+//       }
+//     } catch (err) {
+//       console.error('Error accessing microphone:', err);
+//       setError(`Microphone error: ${err.message}`);
+//       cleanupMediaStream();
+//     }
+//   };
+
+//   const stopListening = () => {
+//     manuallyStoppedRef.current = true;
+//     if (recognitionRef.current) {
+//       recognitionRef.current.stop();
+//       cleanupMediaStream();
+//       setIsListening(false);
+//     }
+//   };
+
+//   const resetTranscript = () => {
+//     setTranscript('');
+//   };
+
+//   return (
+//     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-4 sm:p-6">
+//       <h1 className="text-2xl sm:text-3xl font-bold text-blue-600 mb-4 sm:mb-6">ClassNotesAI</h1>
+
+//       <div className="w-full max-w-2xl sm:max-w-3xl mb-4">
+//         <div className="flex items-center justify-between">
+//           <div className="flex items-center gap-2">
+//             <div className={`w-3 h-3 rounded-full ${isListening ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+//             <span className="text-gray-700 text-sm sm:text-base">
+//               {isListening ? 'Listening...' : 'Not listening'}
+//             </span>
+//           </div>
+//           {error && (
+//             <div className="text-red-500 text-xs sm:text-sm">
+//               {error}
+//             </div>
+//           )}
+//         </div>
+//       </div>
+
+//       <div className="w-full max-w-2xl sm:max-w-3xl mb-4">
+//         <label className="flex items-center gap-2">
+//           <input
+//             type="checkbox"
+//             checked={autoRestart}
+//             onChange={(e) => setAutoRestart(e.target.checked)}
+//             className="form-checkbox h-4 w-4 text-blue-600"
+//           />
+//           <span className="text-sm text-gray-700">Auto-restart when no speech is detected</span>
+//         </label>
+//       </div>
+
+//       <div 
+//         className="w-full max-w-2xl sm:max-w-3xl bg-white p-4 rounded shadow-md mb-4 min-h-[150px] sm:min-h-[200px] text-gray-800 border border-gray-300 text-sm sm:text-base overflow-auto cursor-pointer"
+//         onClick={() => setTextToCopy(transcript)}
+//       >
+//         {transcript || "Your speech will appear here..."}
+//       </div>
+
+//       <div className="flex flex-wrap gap-4 justify-center">
+//         <button
+//           className={`px-4 py-2 text-sm sm:text-base ${isListening ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'} text-white rounded shadow transition`}
+//           onClick={startListening}
+//           disabled={isListening}
+//         >
+//           Start Listening
+//         </button>
+
+//         <button
+//           className={`px-4 py-2 text-sm sm:text-base ${!isListening ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-500 hover:bg-red-600'} text-white rounded shadow transition`}
+//           onClick={stopListening}
+//           disabled={!isListening}
+//         >
+//           Stop Listening
+//         </button>
+
+//         <button
+//           className="px-4 py-2 text-sm sm:text-base bg-blue-500 text-white rounded shadow hover:bg-blue-600 transition"
+//           onClick={setCopied}
+//         >
+//           {isCopied ? "Copied!" : "Copy to Clipboard"}
+//         </button>
+
+//         <button
+//           className="px-4 py-2 text-sm sm:text-base bg-gray-500 text-white rounded shadow hover:bg-gray-600 transition"
+//           onClick={resetTranscript}
+//         >
+//           Reset
+//         </button>
+//       </div>
+
+//       <div className="mt-8 w-full max-w-2xl sm:max-w-3xl p-4 bg-gray-200 rounded text-xs sm:text-sm">
+//         <h2 className="font-bold mb-2">Troubleshooting Tips:</h2>
+//         <ul className="list-disc pl-4">
+//           <li>Speak clearly and at a normal volume</li>
+//           <li>Make sure you're in a quiet environment</li>
+//           <li>Keep your microphone close to your mouth</li>
+//           <li>Try toggling the auto-restart option if recognition stops frequently</li>
+//         </ul>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default App;
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useState, useEffect, useRef } from "react";
+import useClipboard from "react-use-clipboard";
 
 const App = () => {
-  const [transcript, setTranscript] = useState('');
+  const [transcript, setTranscript] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [error, setError] = useState(null);
   const [autoRestart, setAutoRestart] = useState(true);
   const recognitionRef = useRef(null);
   const mediaStreamRef = useRef(null);
   const manuallyStoppedRef = useRef(false);
-  const [textToCopy, setTextToCopy] = useState('');
+  const [textToCopy, setTextToCopy] = useState("");
   const [isCopied, setCopied] = useClipboard(textToCopy, { successDuration: 1000 });
 
+  // Utility: Detect if the user is on a mobile device
+  const isMobileDevice = () => {
+    if (navigator.userAgentData && navigator.userAgentData.mobile !== undefined) {
+      return navigator.userAgentData.mobile;
+    }
+    return /Mobi|Android/i.test(navigator.userAgent);
+  };
+
+  // Cleanup Media Stream
   const cleanupMediaStream = () => {
     if (mediaStreamRef.current) {
       const tracks = mediaStreamRef.current.getTracks();
-      tracks.forEach(track => {
+      tracks.forEach((track) => {
         track.stop();
-        console.log('Stopped media track:', track.kind);
+        console.log("Stopped media track:", track.kind);
       });
       mediaStreamRef.current = null;
     }
   };
 
   useEffect(() => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      setError('Speech recognition is not supported in this browser. Please use Chrome.');
+    if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
+      setError("Speech recognition is not supported in this browser. Please use Chrome.");
       return;
     }
 
@@ -194,54 +451,54 @@ const App = () => {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
 
-      recognitionRef.current.continuous = true;
+      // Adjust continuous flag based on device type
+      recognitionRef.current.continuous = !isMobileDevice();
       recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = 'en-US';
+      recognitionRef.current.lang = "en-US";
       recognitionRef.current.maxAlternatives = 1;
 
       recognitionRef.current.onstart = () => {
-        console.log('Speech recognition started');
+        console.log("Speech recognition started");
         setIsListening(true);
         setError(null);
       };
 
       recognitionRef.current.onend = () => {
-        console.log('Speech recognition ended');
+        console.log("Speech recognition ended");
         setIsListening(false);
-        
+
         if (manuallyStoppedRef.current) {
           cleanupMediaStream();
         } else if (autoRestart && !manuallyStoppedRef.current) {
-          console.log('Auto-restarting speech recognition...');
+          console.log("Auto-restarting speech recognition...");
           setTimeout(() => {
             try {
               recognitionRef.current?.start();
             } catch (e) {
-              console.error('Error auto-restarting:', e);
+              console.error("Error auto-restarting:", e);
             }
           }, 100);
         }
       };
 
       recognitionRef.current.onerror = (event) => {
-        console.log('Speech recognition error:', event.error);
-        
+        console.log("Speech recognition error:", event.error);
         switch (event.error) {
-          case 'no-speech':
+          case "no-speech":
             if (autoRestart && !manuallyStoppedRef.current) {
               try {
                 recognitionRef.current?.start();
               } catch (e) {
-                console.error('Error restarting after no-speech:', e);
+                console.error("Error restarting after no-speech:", e);
               }
             }
             break;
-          case 'audio-capture':
-            setError('No microphone was found or microphone is disabled.');
+          case "audio-capture":
+            setError("No microphone was found or microphone is disabled.");
             cleanupMediaStream();
             break;
-          case 'not-allowed':
-            setError('Microphone permission was denied. Please allow microphone access.');
+          case "not-allowed":
+            setError("Microphone permission was denied. Please allow microphone access.");
             cleanupMediaStream();
             break;
           default:
@@ -251,21 +508,21 @@ const App = () => {
       };
 
       recognitionRef.current.onresult = (event) => {
-        let finalTranscript = '';
-        let interimTranscript = '';
+        let finalTranscript = "";
+        let interimTranscript = "";
 
         for (let i = event.resultIndex; i < event.results.length; i++) {
           const transcript = event.results[i][0].transcript;
           if (event.results[i].isFinal) {
-            finalTranscript += transcript + ' ';
+            finalTranscript += transcript + " ";
           } else {
             interimTranscript += transcript;
           }
         }
-        
+
         if (finalTranscript) {
-          setTranscript(prev => prev + finalTranscript);
-          console.log('Transcribed:', finalTranscript);
+          setTranscript((prev) => prev + finalTranscript.trim() + " ");
+          console.log("Transcribed:", finalTranscript);
         }
       };
     };
@@ -286,12 +543,12 @@ const App = () => {
       manuallyStoppedRef.current = false;
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaStreamRef.current = stream;
-      
+
       if (recognitionRef.current) {
         recognitionRef.current.start();
       }
     } catch (err) {
-      console.error('Error accessing microphone:', err);
+      console.error("Error accessing microphone:", err);
       setError(`Microphone error: ${err.message}`);
       cleanupMediaStream();
     }
@@ -307,7 +564,7 @@ const App = () => {
   };
 
   const resetTranscript = () => {
-    setTranscript('');
+    setTranscript("");
   };
 
   return (
@@ -317,16 +574,12 @@ const App = () => {
       <div className="w-full max-w-2xl sm:max-w-3xl mb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className={`w-3 h-3 rounded-full ${isListening ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+            <div className={`w-3 h-3 rounded-full ${isListening ? "bg-green-500 animate-pulse" : "bg-red-500"}`} />
             <span className="text-gray-700 text-sm sm:text-base">
-              {isListening ? 'Listening...' : 'Not listening'}
+              {isListening ? "Listening..." : "Not listening"}
             </span>
           </div>
-          {error && (
-            <div className="text-red-500 text-xs sm:text-sm">
-              {error}
-            </div>
-          )}
+          {error && <div className="text-red-500 text-xs sm:text-sm">{error}</div>}
         </div>
       </div>
 
@@ -342,7 +595,7 @@ const App = () => {
         </label>
       </div>
 
-      <div 
+      <div
         className="w-full max-w-2xl sm:max-w-3xl bg-white p-4 rounded shadow-md mb-4 min-h-[150px] sm:min-h-[200px] text-gray-800 border border-gray-300 text-sm sm:text-base overflow-auto cursor-pointer"
         onClick={() => setTextToCopy(transcript)}
       >
@@ -351,7 +604,7 @@ const App = () => {
 
       <div className="flex flex-wrap gap-4 justify-center">
         <button
-          className={`px-4 py-2 text-sm sm:text-base ${isListening ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'} text-white rounded shadow transition`}
+          className={`px-4 py-2 text-sm sm:text-base ${isListening ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"} text-white rounded shadow transition`}
           onClick={startListening}
           disabled={isListening}
         >
@@ -359,7 +612,7 @@ const App = () => {
         </button>
 
         <button
-          className={`px-4 py-2 text-sm sm:text-base ${!isListening ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-500 hover:bg-red-600'} text-white rounded shadow transition`}
+          className={`px-4 py-2 text-sm sm:text-base ${!isListening ? "bg-gray-400 cursor-not-allowed" : "bg-red-500 hover:bg-red-600"} text-white rounded shadow transition`}
           onClick={stopListening}
           disabled={!isListening}
         >
@@ -395,3 +648,4 @@ const App = () => {
 };
 
 export default App;
+
